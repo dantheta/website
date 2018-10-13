@@ -63,4 +63,32 @@ router.get('/api/1/search/:query', cors(), (req, res, next) => {
   });
 });
 
+router.get('/api/1/search/url/:query', cors(), (req, res, next) => {
+  let query = req.params.query;
+
+  models.Organisation.findAll({
+    where: {
+      url: {
+        ilike: query + '%',
+      },
+    },
+  }).then(function(_results) {
+    let results = [];
+
+    _results.forEach(function(result) {
+      results.push({
+        name: result.name,
+        url: `${settings.url}/organisation/${result.registrationCountry}/`
+          + `${result.registrationNumber}.json`,
+      });
+    });
+
+    res.setHeader('content-type', 'application/json');
+    res.status(200).send({
+      query: query,
+      results: results,
+    });
+  });
+});
+
 module.exports = router;
